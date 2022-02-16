@@ -7,7 +7,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class DispatchContext extends CommandLibContext {
+public class DispatchContext
+        extends CommandLibContext {
 
     protected final Object commandSender;
     protected final List<String> arguments;

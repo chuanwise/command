@@ -3,11 +3,12 @@ package cn.chuanwise.commandlib.tree;
 import cn.chuanwise.commandlib.CommandLib;
 import cn.chuanwise.commandlib.command.ParameterInfo;
 import cn.chuanwise.commandlib.completer.Completer;
+import cn.chuanwise.commandlib.completer.SimpleCompleter;
 import cn.chuanwise.commandlib.context.CompleteContext;
-import cn.chuanwise.commandlib.context.ReferenceInfo;
-import cn.chuanwise.util.Preconditions;
+import cn.chuanwise.commandlib.util.Arguments;
 import lombok.Data;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -32,11 +33,18 @@ public abstract class ParameterCommandTree
         final Set<String> set = new HashSet<>(super.complete(context));
 
         for (ParameterInfo info : parameterInfo) {
-            for (Completer completer : info.getCompleters()) {
-                set.addAll(completer.complete(context));
+            for (Completer completer : info.getSpecialCompleters()) {
+                for (String string : completer.complete(context)) {
+                    set.add(Arguments.serialize(string));
+                }
             }
         }
 
-        return set;
+        return Collections.unmodifiableSet(set);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
     }
 }

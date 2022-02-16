@@ -6,7 +6,8 @@ import lombok.Data;
 import java.util.*;
 
 @Data
-public class DispatchFork {
+public class DispatchFork
+        implements Cloneable {
 
     protected CommandTree commandTree;
     protected boolean failed;
@@ -20,10 +21,18 @@ public class DispatchFork {
         elements.add(firstElement);
     }
 
-    private DispatchFork(CommandTree commandTree) {
+    public DispatchFork(CommandTree commandTree) {
         Preconditions.argumentNonNull(commandTree, "command tree");
 
         this.commandTree = commandTree;
+    }
+
+    public boolean isWeek() {
+        return commandTree instanceof WeekMatchableCommandTree;
+    }
+
+    public boolean isStrong() {
+        return !isWeek();
     }
 
     /**
@@ -36,8 +45,7 @@ public class DispatchFork {
     public Set<DispatchFork> accept(String argument) throws Exception {
         Preconditions.state(!failed, "dispatch fork failed");
 
-        if (commandTree instanceof RemainParameterCommandTree
-                || commandTree instanceof OptionCommandTree) {
+        if (commandTree instanceof RemainParameterCommandTree) {
             final CommandTree.Element lastElement = elements.get(elements.size() - 1);
             Preconditions.state(lastElement instanceof CommandTree.ValueElement);
             final CommandTree.ValueElement valueElement = (CommandTree.ValueElement) lastElement;
@@ -48,35 +56,64 @@ public class DispatchFork {
 
         final Set<DispatchFork> forks = new HashSet<>();
 
-        boolean succeed = false;
+        boolean forked = false;
         final CommandTree commandTree = this.commandTree;
+
+        if (commandTree instanceof OptionCommandTree) {
+            final OptionCommandTree tree = (OptionCommandTree) commandTree;
+            final Optional<CommandTree.Element> optionalElement = tree.accept(argument);
+            if (optionalElement.isPresent()) {
+                elements.add(optionalElement.get());
+                forked = true;
+            }
+        }
         for (CommandTree son : commandTree.sons) {
             final Optional<CommandTree.Element> optionalElement = son.accept(argument);
             if (optionalElement.isPresent()) {
                 final CommandTree.Element element = optionalElement.get();
-                if (succeed) {
-                    forks.add(fork(element));
+                if (forked) {
+                    forks.add(forkChange(son, element));
                 } else {
                     this.commandTree = son;
                     elements.add(element);
-                    succeed = true;
+                    forked = true;
                 }
             }
         }
 
-        if (!succeed) {
+        if (!forked) {
             failed = true;
         }
 
         return forks;
     }
 
-    private DispatchFork fork(CommandTree.Element element) {
-        final DispatchFork fork = new DispatchFork(commandTree);
+    protected DispatchFork forkChange(CommandTree son, CommandTree.Element element) {
+        final DispatchFork fork = new DispatchFork(son);
 
         final List<CommandTree.Element> elements = fork.getElements();
         elements.addAll(this.elements);
         elements.set(elements.size() - 1, element);
+
+        return fork;
+    }
+
+    protected DispatchFork forkWith(CommandTree son, CommandTree.Element element) {
+        final DispatchFork fork = new DispatchFork(son);
+
+        final List<CommandTree.Element> elements = fork.getElements();
+        elements.addAll(this.elements);
+        elements.add(element);
+
+        return fork;
+    }
+
+    @Override
+    protected DispatchFork clone() {
+        final DispatchFork fork = new DispatchFork(commandTree);
+
+        final List<CommandTree.Element> elements = fork.getElements();
+        elements.addAll(this.elements);
 
         return fork;
     }

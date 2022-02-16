@@ -12,4 +12,8 @@ public class CommandLibConfiguration {
         protected String splitter = "=";
     }
     protected Option option = new Option();
+
+    protected boolean strongMatch = false;
+    protected boolean mergeIntersectedForks = true;
+    protected boolean allowUndefinedOptionValue = false;
 }

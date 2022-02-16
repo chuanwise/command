@@ -2,9 +2,9 @@ package cn.chuanwise.commandlib.tree;
 
 import cn.chuanwise.commandlib.CommandLib;
 import cn.chuanwise.commandlib.command.Command;
-import cn.chuanwise.commandlib.completer.Completer;
+import cn.chuanwise.commandlib.command.OptionInfo;
+import cn.chuanwise.commandlib.configuration.CommandLibConfiguration;
 import cn.chuanwise.commandlib.context.CompleteContext;
-import cn.chuanwise.commandlib.context.ReferenceInfo;
 import cn.chuanwise.commandlib.object.SimpleCommandLibObject;
 import cn.chuanwise.util.Preconditions;
 import cn.chuanwise.util.Strings;
@@ -18,8 +18,6 @@ public abstract class CommandTree extends SimpleCommandLibObject {
 
     protected CommandTree parent;
     protected final Set<CommandTree> sons = new HashSet<>();
-
-    protected final Set<Completer> completers = new HashSet<>();
 
     protected Command command;
 
@@ -58,6 +56,20 @@ public abstract class CommandTree extends SimpleCommandLibObject {
         }
     }
 
+    @Data
+    protected static class OptionElement extends ValueElement {
+
+        protected final OptionInfo optionInfo;
+
+        public OptionElement(String string, OptionInfo optionInfo) {
+            super(string);
+
+            Preconditions.argumentNonNull(optionInfo, "option info");
+
+            this.optionInfo = optionInfo;
+        }
+    }
+
     /** 普通文本占位符 */
     @Data
     protected static class PlainTextElement extends Element {
@@ -68,11 +80,7 @@ public abstract class CommandTree extends SimpleCommandLibObject {
     protected abstract Optional<Element> accept(String argument) throws Exception;
 
     public Set<String> complete(CompleteContext context) throws Exception {
-        final Set<String> set = new HashSet<>();
-        for (Completer completer : completers) {
-            set.addAll(completer.complete(context));
-        }
-        return set;
+        return commandLib.pipeline().handleComplete(context);
     }
 
     public boolean isExecutable() {
@@ -102,6 +110,48 @@ public abstract class CommandTree extends SimpleCommandLibObject {
                 .collect(Collectors.toSet()));
     }
 
+    public Set<CommandTree> getExecutableParentCommandTrees() {
+        final Set<CommandTree> set = new HashSet<>();
+
+        CommandTree parent = this.parent;
+        while (Objects.nonNull(parent)) {
+            if (parent.isExecutable()) {
+                set.add(parent);
+            }
+            parent = parent.parent;
+        }
+
+        return Collections.unmodifiableSet(set);
+    }
+
+    public Set<Command> getParentCommands() {
+        return Collections.unmodifiableSet(getExecutableParentCommandTrees()
+                .stream()
+                .map(CommandTree::getCommand)
+                .collect(Collectors.toSet()));
+    }
+
+    public Set<CommandTree> getRelatedCommandTrees() {
+        final Set<CommandTree> set = new HashSet<>(getExecutableSubCommandTrees());
+        if (isExecutable()) {
+            set.add(this);
+        }
+        set.addAll(getExecutableParentCommandTrees());
+        return Collections.unmodifiableSet(set);
+    }
+
+    public Set<Command> getRelatedCommands() {
+        final Set<Command> set = new HashSet<>();
+
+        getExecutableParentCommandTrees().forEach(x -> set.add(x.command));
+        getExecutableSubCommandTrees().forEach(x -> set.add(x.command));
+
+        if (isExecutable()) {
+            set.add(command);
+        }
+        return Collections.unmodifiableSet(set);
+    }
+
     public String getParentUsage() {
         if (Objects.isNull(parent)) {
             return "";
@@ -109,7 +159,7 @@ public abstract class CommandTree extends SimpleCommandLibObject {
             final List<String> usages = new ArrayList<>();
             CommandTree commandTree = parent;
             while (commandTree != null) {
-                usages.add(commandTree.getSingleUsage());
+                usages.add(commandTree.getSimpleUsage());
                 commandTree = commandTree.parent;
             }
 
@@ -125,21 +175,127 @@ public abstract class CommandTree extends SimpleCommandLibObject {
     public String getUsage() {
         final String parentUsage = getParentUsage();
         if (Strings.isEmpty(parentUsage)) {
-            return getSingleUsage();
+            return getSimpleUsage();
         } else {
-            return parentUsage + " " + getSingleUsage();
+            return parentUsage + " " + getSimpleUsage();
         }
     }
 
-    public abstract String getSingleUsage();
+    public abstract String getSimpleUsage();
 
-    protected abstract SimpleParameterCommandTree createSimpleParameterSon();
+    public String getCompleteUsage() {
+        return getSimpleUsage();
+    }
 
-    protected abstract PlainTextsCommandTree createPlainTextSon(List<String> texts);
+    protected SimpleParameterCommandTree createSimpleParameterSon() {
+//        // 检查是否已经有孤儿
+//        for (CommandTree son : sons) {
+//            Preconditions.state(!(son instanceof SingletonCommandTree), "不能为 " + son.getClass().getSimpleName() + " 添加新的兄弟节点");
+//        }
 
-    protected abstract NullableRemainParameterCommandTree createNullableRemainParameterSon();
+        // 寻找第一个简单参数孩子
+        SimpleParameterCommandTree commandTree = null;
+        for (CommandTree son : sons) {
+            if (son instanceof SimpleParameterCommandTree) {
+                commandTree = (SimpleParameterCommandTree) son;
+                break;
+            }
+        }
 
-    protected abstract NonNullRemainParameterCommandTree createNonNullRemainParameterSon();
+        if (Objects.isNull(commandTree)) {
+            commandTree = new SimpleParameterCommandTree(getCommandLib());
+            commandTree.setParent(this);
+            sons.add(commandTree);
+        }
 
-    protected abstract OptionCommandTree createOptionSon();
+        return commandTree;
+    }
+
+    protected PlainTextsCommandTree createPlainTextSon(List<String> texts) {
+        final CommandLibConfiguration configuration = commandLib.getConfiguration();
+
+        // 检查是否已经有孤儿
+        for (CommandTree son : sons) {
+            Preconditions.state(!(son instanceof SingletonCommandTree) || !configuration.isStrongMatch(),
+                    "除非关闭强匹配 strongMatch，否则不能为其添加新的兄弟节点");
+        }
+
+        // 检查是否重复
+        for (CommandTree son : sons) {
+            if (son instanceof PlainTextsCommandTree) {
+                final PlainTextsCommandTree plainTextsCommandTree = (PlainTextsCommandTree) son;
+
+                // 要么完全不相干，要么完全相等
+                final List<String> clonedTexts = new ArrayList<>(texts);
+                clonedTexts.removeAll(plainTextsCommandTree.getTexts());
+
+                final boolean related = clonedTexts.size() != texts.size();
+                if (related) {
+                    final boolean equals = clonedTexts.isEmpty() && texts.size() == plainTextsCommandTree.getTexts().size();
+                    Preconditions.state(configuration.isMergeIntersectedForks() || equals, "交错的指令分支");
+
+                    return plainTextsCommandTree;
+                }
+            }
+        }
+
+        // 创建新的
+        final PlainTextsCommandTree commandTree = new PlainTextsCommandTree(texts, getCommandLib());
+        commandTree.setParent(this);
+        sons.add(commandTree);
+        return commandTree;
+    }
+
+    protected NullableRemainParameterCommandTree createNullableRemainParameterSon() {
+        // 检查是否已经有孤儿
+        Preconditions.state(sons.isEmpty() || !commandLib.getConfiguration().isStrongMatch(), "除非关闭强匹配 strongMatch，否则剩余参数分支不能具备兄弟节点");
+
+        final NullableRemainParameterCommandTree commandTree = new NullableRemainParameterCommandTree(getCommandLib());
+        commandTree.setParent(this);
+        sons.add(commandTree);
+
+        return commandTree;
+    }
+
+    protected NonNullRemainParameterCommandTree createNonNullRemainParameterSon() {
+        // 检查是否已经有孤儿
+        Preconditions.state(sons.isEmpty() || !commandLib.getConfiguration().isStrongMatch(), "除非关闭强匹配 strongMatch，否则剩余参数分支不能具备兄弟节点");
+
+        final NonNullRemainParameterCommandTree commandTree = new NonNullRemainParameterCommandTree(getCommandLib());
+        commandTree.setParent(this);
+        sons.add(commandTree);
+
+        return commandTree;
+    }
+
+    protected OptionCommandTree createOptionSon() {
+//        // 检查是否已经有孤儿
+//        Preconditions.state(sons.isEmpty(), "选项列表不能具备兄弟节点");
+
+        final OptionCommandTree commandTree = new OptionCommandTree(getCommandLib());
+        commandTree.setParent(this);
+        sons.add(commandTree);
+
+        return commandTree;
+    }
+
+    public Optional<PlainTextsCommandTree> getPlainTextsSubCommandTree(String text) {
+        Preconditions.argumentNonEmpty(text, "text");
+
+        for (CommandTree son : sons) {
+            if (son instanceof PlainTextsCommandTree) {
+                final PlainTextsCommandTree commandTree = (PlainTextsCommandTree) son;
+                if (commandTree.texts.contains(text)) {
+                    return Optional.of(commandTree);
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public String toString() {
+        return getSimpleUsage();
+    }
 }

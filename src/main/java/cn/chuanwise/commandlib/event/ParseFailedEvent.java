@@ -10,9 +10,9 @@ public class ParseFailedEvent
         extends CommandExecuteEvent {
 
     protected final int parameterIndex;
-    protected final Provider<?> provider;
+    protected final Provider provider;
 
-    public ParseFailedEvent(CommandContext commandContext, int parameterIndex, Provider<?> provider) {
+    public ParseFailedEvent(CommandContext commandContext, int parameterIndex, Provider provider) {
         super(commandContext);
 
         Preconditions.argument(parameterIndex >= 0);

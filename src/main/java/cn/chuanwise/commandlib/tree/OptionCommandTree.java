@@ -3,16 +3,18 @@ package cn.chuanwise.commandlib.tree;
 import cn.chuanwise.commandlib.CommandLib;
 import cn.chuanwise.commandlib.command.OptionInfo;
 import cn.chuanwise.commandlib.completer.Completer;
+import cn.chuanwise.commandlib.completer.SimpleCompleter;
 import cn.chuanwise.commandlib.configuration.CommandLibConfiguration;
 import cn.chuanwise.commandlib.context.CompleteContext;
+import cn.chuanwise.commandlib.util.Arguments;
+import cn.chuanwise.commandlib.util.Options;
 import cn.chuanwise.exception.IllegalOperationException;
+import cn.chuanwise.util.CollectionUtil;
 import cn.chuanwise.util.Strings;
 import lombok.Data;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 public class OptionCommandTree
@@ -27,12 +29,53 @@ public class OptionCommandTree
 
     @Override
     protected Optional<Element> accept(String argument) throws Exception {
+        final CommandLibConfiguration.Option option = commandLib.getConfiguration().getOption();
+
+        for (OptionInfo info : optionInfo) {
+            final String namePrefix = option.getPrefix() + info.getName();
+            if (argument.startsWith(namePrefix)) {
+                return Optional.of(new OptionElement(argument.substring(namePrefix.length()), info));
+            }
+
+            for (String alias : info.getAliases()) {
+                final String aliasPrefix = option.getPrefix() + alias;
+                if (argument.startsWith(aliasPrefix)) {
+                    return Optional.of(new OptionElement(argument.substring(aliasPrefix.length()), info));
+                }
+            }
+        }
         return Optional.empty();
     }
 
     @Override
-    public String getSingleUsage() {
-        return null;
+    public String getSimpleUsage() {
+        if (optionInfo.isEmpty()) {
+            return "[-...]";
+        } else {
+            return CollectionUtil.toString(
+                    optionInfo,
+                    x -> "[-" + x.getName() + "]",
+                    " "
+            );
+        }
+    }
+
+    @Override
+    public String getCompleteUsage() {
+        if (optionInfo.isEmpty()) {
+            return "[-...]";
+        } else {
+            return CollectionUtil.toString(
+                    optionInfo,
+                    x -> "[-"
+                            + x.getName()
+                            + (Optional.ofNullable(CollectionUtil.toString(x.getAliases(), "|")).orElse(""))
+                            + (Optional.ofNullable(CollectionUtil.toString(x.getOptionalValues(), "|")).map(y -> "=" + y).orElse(""))
+                            + (Objects.nonNull(x.getDefaultValue()) ? "?" : "")
+                            + "]",
+                    " "
+            );
+        }
     }
 
     @Override
@@ -41,18 +84,29 @@ public class OptionCommandTree
 
         final CommandLibConfiguration.Option option = context.getCommandLib().getConfiguration().getOption();
         for (OptionInfo info : optionInfo) {
-            for (Completer completer : info.getCompleters()) {
-                for (String result : completer.complete(context)) {
-                    set.add(option.getPrefix() + info.getName() + option.getSplitter() + result);
-                }
+            final Set<String> values = new HashSet<>();
+            for (Completer completer : info.getSpecialCompleters()) {
+                values.addAll(completer.complete(context));
+            }
+
+            if (cn.chuanwise.util.Collections.nonEmpty(info.getOptionalValues())) {
+                values.addAll(info.getOptionalValues());
             }
 
             if (Strings.nonEmpty(info.getDefaultValue())) {
-                set.add(option.getPrefix() + info.getName());
+                final String defaultValue = info.getDefaultValue();
+                values.add(defaultValue);
             }
+
+            values.add("");
+
+            final Set<String> serializedArguments = values.stream()
+                    .map(Arguments::serialize)
+                    .collect(Collectors.toSet());
+            set.addAll(Options.complete(option, info, serializedArguments));
         }
 
-        return set;
+        return java.util.Collections.unmodifiableSet(set);
     }
 
     @Override
@@ -78,5 +132,10 @@ public class OptionCommandTree
     @Override
     protected OptionCommandTree createOptionSon() {
         throw new IllegalOperationException("不能在选项列表下继续添加分支");
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
     }
 }

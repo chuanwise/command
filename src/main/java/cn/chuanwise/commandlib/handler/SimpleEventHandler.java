@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public abstract class SimpleEventHandler<T>
-        extends CommandLibHandlerAdapter {
+        extends HandlerAdapter {
 
     protected final Class<T> eventClass;
 

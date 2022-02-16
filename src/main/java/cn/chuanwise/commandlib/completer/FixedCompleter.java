@@ -8,12 +8,12 @@ import java.util.Collections;
 import java.util.Set;
 
 @Data
-public class FixedCompleter extends Completer {
+public class FixedCompleter
+        implements Completer {
 
     protected final Set<String> values;
 
     public FixedCompleter(Set<String> values) {
-        super(Object.class);
         Preconditions.argumentNonNull(values, "values");
 
         this.values = Collections.unmodifiableSet(values);

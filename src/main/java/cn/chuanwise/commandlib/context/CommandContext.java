@@ -8,7 +8,8 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class CommandContext extends CommandLibContext {
+public class CommandContext
+        extends CommandLibContext {
 
     protected final Object commandSender;
     protected final Command command;

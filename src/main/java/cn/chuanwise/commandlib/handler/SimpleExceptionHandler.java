@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public abstract class SimpleExceptionHandler<T extends Throwable>
-        extends CommandLibHandlerAdapter {
+        extends HandlerAdapter {
 
     protected final Class<T> exceptionClass;
 
@@ -23,7 +23,7 @@ public abstract class SimpleExceptionHandler<T extends Throwable>
 
     @Override
     @SuppressWarnings("all")
-    public final boolean handleException(Throwable cause) throws Exception {
+    public final boolean handleException(Throwable cause) throws Throwable {
         if (exceptionClass.isInstance(cause)) {
             handleException0((T) cause);
             return true;

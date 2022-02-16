@@ -4,6 +4,7 @@ import java.lang.annotation.*;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
+@Repeatable(Formats.class)
 public @interface Format {
     /**
      * 指令格式

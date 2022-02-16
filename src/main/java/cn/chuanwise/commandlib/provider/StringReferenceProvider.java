@@ -2,6 +2,7 @@ package cn.chuanwise.commandlib.provider;
 
 import cn.chuanwise.commandlib.command.ParameterInfo;
 import cn.chuanwise.commandlib.context.CommandContext;
+import cn.chuanwise.commandlib.context.ProvideContext;
 import cn.chuanwise.commandlib.context.ReferenceInfo;
 import cn.chuanwise.toolkit.container.Container;
 
@@ -12,7 +13,7 @@ public class StringReferenceProvider extends ReferenceProvider<String> {
     }
 
     @Override
-    protected Container<String> provide0(CommandContext context, ReferenceInfo referenceInfo) throws Exception {
+    protected Container<String> provide1(ProvideContext context, ReferenceInfo referenceInfo) throws Exception {
         return Container.of(referenceInfo.getString());
     }
 }

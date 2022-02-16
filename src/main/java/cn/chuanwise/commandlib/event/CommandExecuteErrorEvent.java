@@ -6,7 +6,8 @@ import lombok.Data;
 
 @Data
 public class CommandExecuteErrorEvent
-        extends CommandExecuteEvent {
+        extends CommandExecuteEvent
+        implements ErrorEvent {
 
     protected final Throwable cause;
 

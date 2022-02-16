@@ -1,19 +1,18 @@
 package cn.chuanwise.commandlib.command;
 
 import cn.chuanwise.commandlib.CommandLib;
-import cn.chuanwise.commandlib.annotation.Reference;
+import cn.chuanwise.commandlib.annotation.Format;
+import cn.chuanwise.commandlib.annotation.Refer;
 import cn.chuanwise.commandlib.completer.Completer;
 import cn.chuanwise.commandlib.context.CommandContext;
+import cn.chuanwise.commandlib.context.ProvideContext;
 import cn.chuanwise.commandlib.event.*;
 import cn.chuanwise.commandlib.object.CommandLibObject;
 import cn.chuanwise.commandlib.parser.Parser;
-import cn.chuanwise.commandlib.provider.ParserReferenceProvider;
-import cn.chuanwise.commandlib.provider.Provider;
-import cn.chuanwise.commandlib.provider.StringReferenceProvider;
+import cn.chuanwise.commandlib.provider.*;
 import cn.chuanwise.toolkit.container.Container;
 import cn.chuanwise.util.Preconditions;
 import cn.chuanwise.util.Reflects;
-import cn.chuanwise.util.Strings;
 import lombok.Data;
 
 import java.lang.reflect.*;
@@ -28,14 +27,14 @@ public class MethodCommandExecutor
     protected final Object source;
     protected final Method method;
 
-    protected final Provider<?>[] providers;
+    protected final Provider[] providers;
 
     public MethodCommandExecutor(Command command, Object source, Method method) {
         Preconditions.argumentNonNull(command, "command");
         Preconditions.argumentNonNull(method, "method");
+        Preconditions.argument(method.getAnnotationsByType(Format.class).length != 0, "method without @Format(...) annotation");
 
         this.command = command;
-        final CommandLib commandLib = command.getCommandLib();
 
         final Class<?> declaringClass = method.getDeclaringClass();
         if (Modifier.isStatic(method.getModifiers())) {
@@ -48,39 +47,52 @@ public class MethodCommandExecutor
 
         // fill providers
         final Parameter[] parameters = method.getParameters();
-        final List<Provider<?>> providerList = new ArrayList<>(parameters.length);
+        final List<Provider> providerList = new ArrayList<>(parameters.length);
 
         for (int i = 0; i < parameters.length; i++) {
             final Parameter parameter = parameters[i];
             final Class<?> parameterClass = parameter.getType();
 
             // 检查标签
-            final Reference reference = parameter.getAnnotation(Reference.class);
-            final Provider<?> provider;
-            if (Objects.isNull(reference)) {
-                // 查找默认 parser
-                final Optional<? extends Provider<?>> optionalProvider = commandLib.getProvider(parameterClass);
-                check(optionalProvider.isPresent(), i, "参数不具备 @Reference 注解，也无针对其类型 " + parameterClass.getName() + " 的默认填充器");
-                provider = optionalProvider.get();
+            final Refer refer = parameter.getAnnotation(Refer.class);
+            final Provider provider;
+            if (Objects.isNull(refer)) {
+                // 运行时 Provide
+                provider = new RuntimeProvider<>(parameterClass);
             } else {
                 // 根据注解解析
-                final String referenceName = reference.value();
-                final ParameterInfo parameterInfo = command.parameterInfo.get(referenceName);
-                check(Objects.nonNull(parameterInfo), i, "参数引用了 " + referenceName + "，但指令中并没有该变量。指令格式：" + command.getUsage());
+                final String referenceName = refer.value();
+                final ParameterInfo parameterInfo;
+
+                // 先当作普通参数，不行再查找
+                ParameterInfo tempParameterInfo = command.parameterInfo.get(referenceName);
+                if (Objects.isNull(tempParameterInfo)) {
+                    for (ParameterInfo info : command.parameterInfo.values()) {
+                        if (info instanceof OptionInfo) {
+                            final OptionInfo optionInfo = (OptionInfo) info;
+                            if (optionInfo.getAliases().contains(referenceName)) {
+                                tempParameterInfo = optionInfo;
+                                break;
+                            }
+                        }
+                    }
+                }
+                parameterInfo = tempParameterInfo;
+
+                check(Objects.nonNull(parameterInfo), i, "参数引用了 " + referenceName + "，但指令中并没有该变量。指令格式：" + command.getFormat());
 
                 // 解析 Provider
                 if (Objects.equals(parameterClass, String.class)) {
                     provider = new StringReferenceProvider(parameterInfo);
                 } else {
                     // 检查是否有指定的 Parser
-                    final Class<? extends Parser> parserClass = reference.parser();
-                    final Parser<?> parser;
+                    final Class<? extends Parser> parserClass = refer.parser();
                     if (Objects.equals(parserClass, Parser.class)) {
-                        // 寻找解析器
-                        final Optional<? extends Parser<?>> optionalParser = commandLib.getParser(parameterClass);
-                        check(optionalParser.isPresent(), i, "无法找到对参数类型 " + parameterClass.getName() + " 的默认解析器");
-                        parser = optionalParser.get();
+                        // 运行时解析
+                        provider = new RuntimeParseProvider<>(parameterClass, parameterInfo);
                     } else {
+                        final Parser parser;
+
                         // 尝试构造解析器
                         check(!Modifier.isAbstract(parameterClass.getModifiers()), i, "参数指定使用的解析器类型 " + parserClass.getName() + " 是抽象的，无法构造");
 
@@ -90,10 +102,10 @@ public class MethodCommandExecutor
                             final Object instance = optionalStaticInstance.get();
                             check(parserClass.isInstance(instance.getClass()), i,
                                     "参数指定使用的解析器类型 " + parserClass.getName() + " 具备静态 INSTANCE 属性，但其值并非解析器类型");
-                            parser = (Parser<?>) instance;
+                            parser = (Parser) instance;
                         } else {
                             // 尝试无参构造
-                            Parser<?> tempParser = null;
+                            Parser tempParser = null;
                             try {
                                 final Constructor<? extends Parser> constructor = parserClass.getConstructor();
                                 synchronized (constructor) {
@@ -115,18 +127,14 @@ public class MethodCommandExecutor
                             }
                             parser = tempParser;
                         }
+                        provider = new SpecialParserReferenceProvider<>(parser, parameterClass, parameterInfo);
                     }
-                    check(parameterClass.isAssignableFrom(parser.getParsedClass()), i,
-                            "指定解析器类型 " + parserClass.getName() + " 不匹配参数类型 " + parameterClass.getName());
-                    provider = new ParserReferenceProvider<>(parser, parameterInfo);
                 }
 
                 // 解析 Completer
-                final Class<? extends Completer> completerClass = reference.completer();
-                final Completer completer;
-                if (Objects.equals(completerClass, Completer.class)) {
-                    completer = commandLib.getCompleter(parameterClass).orElse(null);
-                } else {
+                final Class<? extends Completer> completerClass = refer.completer();
+                if (!Objects.equals(completerClass, Completer.class)) {
+                    final Completer completer;
                     check(!Modifier.isAbstract(completerClass.getModifiers()), i, "参数指定使用的补全器类型 " + completerClass.getName() + " 是抽象的，无法构造");
 
                     // 寻找 static INSTANCE
@@ -160,10 +168,11 @@ public class MethodCommandExecutor
                         }
                         completer = tempCompleter;
                     }
+                    parameterInfo.specialCompleters.add(completer);
                 }
-                if (Objects.nonNull(completer)) {
-                    parameterInfo.completers.add(completer);
-                }
+
+                // 添加参数类型
+                parameterInfo.parameterClasses.add(parameterClass);
             }
 
             providerList.add(provider);
@@ -182,17 +191,6 @@ public class MethodCommandExecutor
     @Override
     public boolean execute(CommandContext context) throws Exception {
         final CommandLib commandLib = getCommandLib();
-        if (Strings.nonEmpty(command.getPermission())) {
-            final PermissionVerifyEvent permissionVerifyEvent = new PermissionVerifyEvent(context, command.getPermission());
-            commandLib.handleEvent(permissionVerifyEvent);
-
-            if (!permissionVerifyEvent.isAuthorized()) {
-                final PermissionDeniedEvent permissionDeniedEvent = new PermissionDeniedEvent(context, command.getPermission());
-                commandLib.handleEvent(permissionDeniedEvent);
-                return false;
-            }
-        }
-
         final CommandExecutePreEvent commandHandlePreEvent = new CommandExecutePreEvent(context);
         commandLib.handleEvent(commandHandlePreEvent);
         if (commandHandlePreEvent.isCancelled()) {
@@ -202,22 +200,22 @@ public class MethodCommandExecutor
         final Object[] arguments = new Object[providers.length];
         final Parameter[] parameters = method.getParameters();
         for (int i = 0; i < providers.length; i++) {
-            final Provider<?> provider = providers[i];
-            final Container<?> container = provider.provide(context);
+            final Provider provider = providers[i];
+            final Container<?> container = provider.provide(
+                    new ProvideContext(
+                            context.getCommandSender(),
+                            context.getReferenceInfo(),
+                            context.getCommand(),
+                            parameters[i]
+                    )
+            );
 
             if (Objects.isNull(container) || container.isEmpty()) {
                 commandLib.handleEvent(new ParseFailedEvent(context, i, provider));
                 return false;
             }
 
-            // 检查类型
-            final Class<?> parameterClass = parameters[i].getType();
             final Object argument = container.get();
-            if (Objects.nonNull(argument) && !parameterClass.isInstance(argument)) {
-                commandLib.handleEvent(new ParseErrorEvent(context, i, parameterClass, argument));
-                return false;
-            }
-
             arguments[i] = argument;
         }
 

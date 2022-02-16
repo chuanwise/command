@@ -5,7 +5,8 @@ import cn.chuanwise.commandlib.object.SimpleCommandLibObject;
 import lombok.Data;
 
 @Data
-public class CommandLibContext extends SimpleCommandLibObject {
+public class CommandLibContext
+        extends SimpleCommandLibObject {
 
     public CommandLibContext(CommandLib commandLib) {
         super(commandLib);
