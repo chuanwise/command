@@ -1,0 +1,63 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+// scripts in root project directory
+def mirrorScriptFile = new File('mirrors.gradle')
+def publishScriptFile = new File('publish.gradle')
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'java'
+
+    group 'cn.chuanwise'
+    version '2.5.1-SNAPSHOT'
+
+    // if there is a mirror script, apply it
+    if (mirrorScriptFile.isFile()) {
+        apply from: mirrorScriptFile.getAbsolutePath()
+    }
+
+    // if there is a publish script, apply it
+    if (publishScriptFile.isFile()) {
+        apply from: publishScriptFile.getAbsolutePath()
+    }
+
+    repositories {
+        mavenLocal()
+
+        // codethink maven
+        maven {
+            name('codethink maven')
+
+            // set to true for ignoring warning
+            allowInsecureProtocol(true)
+
+            url('http://121.4.253.187:8081/repository/maven-public/')
+        }
+
+        mavenCentral()
+    }
+
+    dependencies {
+        // lombok
+        compileOnly 'org.projectlombok:lombok:1.18.22'
+        annotationProcessor 'org.projectlombok:lombok:1.18.22'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+        testCompileOnly 'org.projectlombok:lombok:1.18.22'
+
+        // chuanwise common
+        implementation 'cn.chuanwise:chuanwise-common:1.0-SNAPSHOT'
+
+        // junit
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}

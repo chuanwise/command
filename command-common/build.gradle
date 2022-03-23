@@ -1,0 +1,6 @@
+plugins {
+    id 'java'
+}
+
+group 'cn.chuanwise'
+version '1.0-SNAPSHOT'
