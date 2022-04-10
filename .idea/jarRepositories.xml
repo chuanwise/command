@@ -12,11 +12,6 @@
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="MavenRepo" />
-      <option name="name" value="MavenRepo" />
-      <option name="url" value="https://repo.maven.apache.org/maven2/" />
-    </remote-repository>
-    <remote-repository>
       <option name="id" value="maven4" />
       <option name="name" value="maven4" />
       <option name="url" value="https://maven.aliyun.com/repository/gradle-plugin/" />
@@ -37,6 +32,16 @@
       <option name="url" value="https://maven.aliyun.com/repository/jcenter/" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="MavenLocal" />
+      <option name="name" value="MavenLocal" />
+      <option name="url" value="file:/$PROJECT_DIR$/../../../tool/maven/repository/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="MavenRepo" />
+      <option name="name" value="MavenRepo" />
+      <option name="url" value="https://repo.maven.apache.org/maven2/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="maven5" />
       <option name="name" value="maven5" />
       <option name="url" value="https://maven.aliyun.com/nexus/content/repositories/google" />
@@ -55,11 +60,6 @@
       <option name="id" value="codethink maven" />
       <option name="name" value="codethink maven" />
       <option name="url" value="http://121.4.253.187:8081/repository/maven-public/" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="MavenLocal" />
-      <option name="name" value="MavenLocal" />
-      <option name="url" value="file:/$PROJECT_DIR$/../../../tool/maven/repository/" />
     </remote-repository>
   </component>
 </project>

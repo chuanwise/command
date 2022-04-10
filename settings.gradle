@@ -1,4 +1,4 @@
 rootProject.name = 'command'
-include 'command-common'
 include 'command-module-jline'
+include 'command-core'
 

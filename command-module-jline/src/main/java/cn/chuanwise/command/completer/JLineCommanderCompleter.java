@@ -17,8 +17,8 @@ import java.util.List;
  * @author Chuanwise
  */
 public class JLineCommanderCompleter
-        extends AbstractCommanderObject
-        implements Completer {
+    extends AbstractCommanderObject
+    implements Completer {
 
     public JLineCommanderCompleter(Commander commander) {
         super(commander);
@@ -36,7 +36,7 @@ public class JLineCommanderCompleter
             uncompleted = false;
         }
 
-        commander.sortedComplete(new DispatchContext(commander, null, line), uncompleted)
+        commander.getCompleteService().sortedComplete(new DispatchContext(commander, null, line), uncompleted)
                 .stream()
                 .map(Candidate::new)
                 .forEach(list::add);

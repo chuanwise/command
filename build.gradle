@@ -14,7 +14,7 @@ subprojects {
     apply plugin: 'java'
 
     group 'cn.chuanwise'
-    version '2.5.1-SNAPSHOT'
+    version '2.6.1'
 
     // if there is a mirror script, apply it
     if (mirrorScriptFile.isFile()) {
@@ -50,7 +50,7 @@ subprojects {
         testCompileOnly 'org.projectlombok:lombok:1.18.22'
 
         // chuanwise common
-        implementation 'cn.chuanwise:chuanwise-common:1.0-SNAPSHOT'
+        api 'cn.chuanwise:chuanwise-common:1.0-SNAPSHOT'
 
         // junit
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'

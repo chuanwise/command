@@ -1,10 +1,6 @@
-plugins {
-    id 'java'
-}
-
 dependencies {
     // jline
     compileOnly 'org.jline:jline:3.21.0'
 
-    compileOnly project(':command-common')
+    compileOnly project(':command-core')
 }
