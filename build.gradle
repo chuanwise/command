@@ -30,8 +30,7 @@ subprojects {
         mavenLocal()
 
         maven {
-            name 'codethink maven'
-
+            name 'codethink-maven'
             url 'https://repo.codethink.top/public'
         }
 
