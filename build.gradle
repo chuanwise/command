@@ -29,14 +29,10 @@ subprojects {
     repositories {
         mavenLocal()
 
-        // codethink maven
         maven {
-            name('codethink maven')
+            name 'codethink maven'
 
-            // set to true for ignoring warning
-            allowInsecureProtocol(true)
-
-            url('http://121.4.253.187:8081/repository/maven-public/')
+            url 'https://repo.codethink.top/public'
         }
 
         mavenCentral()

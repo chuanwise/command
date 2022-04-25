@@ -61,5 +61,10 @@
       <option name="name" value="codethink maven" />
       <option name="url" value="http://121.4.253.187:8081/repository/maven-public/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="codethink maven" />
+      <option name="name" value="codethink maven" />
+      <option name="url" value="https://repo.codethink.top/public" />
+    </remote-repository>
   </component>
 </project>
