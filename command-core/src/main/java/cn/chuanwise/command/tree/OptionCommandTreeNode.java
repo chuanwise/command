@@ -10,9 +10,11 @@ import cn.chuanwise.command.util.Arguments;
 import cn.chuanwise.command.util.Options;
 import cn.chuanwise.common.util.Joiner;
 import cn.chuanwise.common.util.Preconditions;
+import cn.chuanwise.common.util.Strings;
 import lombok.Data;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Data
@@ -85,7 +87,7 @@ public class OptionCommandTreeNode
             return Joiner.builder()
                 .delimiter(" ")
                 .build()
-                .plus(optionInfo, x -> "[-" + x.getName() + "]")
+                .plus(optionInfo, (Function<OptionInfo, String>) x -> "[-" + x.getName() + "]")
                 .join();
         }
     }
@@ -98,7 +100,7 @@ public class OptionCommandTreeNode
             return Joiner.builder()
                 .delimiter(" ")
                 .build()
-                .plus(optionInfo, x -> {
+                .plus(optionInfo, (Function<OptionInfo, String>) x -> {
                     final StringBuilder stringBuilder = new StringBuilder(x.getName());
     
                     // | aliases
@@ -124,7 +126,7 @@ public class OptionCommandTreeNode
                     
                     // default values
                     final String defaultValue = x.getDefaultValue();
-                    if (cn.chuanwise.common.util.Strings.nonEmpty(defaultValue)) {
+                    if (Strings.nonEmpty(defaultValue)) {
                         stringBuilder.append("?").append(defaultValue);
                     }
                     
