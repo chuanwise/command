@@ -52,7 +52,7 @@ public class EventService
      * @return 该事件是否被任何监听器处理
      */
     public boolean broadcastEvent(Object event) {
-        Preconditions.namedArgumentNonNull(event, "event");
+        Preconditions.objectNonNull(event, "event");
         
         return commander.getExceptionService().catching(() -> {
             final boolean highest = broadcastEvent0(Priority.HIGHEST, event);
@@ -115,8 +115,8 @@ public class EventService
      * @param alwaysValid 监听器有效性
      */
     public void registerEventHandler(EventHandler eventHandler, Priority priority, boolean alwaysValid) {
-        Preconditions.namedArgumentNonNull(eventHandler, "event handler");
-        Preconditions.namedArgumentNonNull(priority, "priority");
+        Preconditions.objectNonNull(eventHandler, "event handler");
+        Preconditions.objectNonNull(priority, "priority");
         
         Maps.getOrPutGet(eventHandlers, priority, CopyOnWriteArrayList::new).add(new EventHandlerContainer(eventHandler, alwaysValid));
     }
@@ -132,9 +132,9 @@ public class EventService
      * @return 被注册的监听器
      */
     public <T> EventHandler registerEventHandler(Class<T> eventClass, Priority priority, boolean alwaysValid, ExceptionConsumer<T> action) {
-        Preconditions.namedArgumentNonNull(eventClass, "event class");
-        Preconditions.namedArgumentNonNull(action, "action");
-        Preconditions.namedArgumentNonNull(priority, "priority");
+        Preconditions.objectNonNull(eventClass, "event class");
+        Preconditions.objectNonNull(action, "action");
+        Preconditions.objectNonNull(priority, "priority");
         
         final List<EventHandlerContainer> eventHandlers = Maps.getOrPutGet(this.eventHandlers, priority, CopyOnWriteArrayList::new);
         final SimpleEventHandler<T> eventHandler = new SimpleEventHandler<>(eventClass, action);
@@ -188,7 +188,7 @@ public class EventService
      * @return 是否卸载了该事件监听器
      */
     public boolean unregisterEventHandler(EventHandler eventHandler) {
-        Preconditions.namedArgumentNonNull(eventHandler, "event handler");
+        Preconditions.objectNonNull(eventHandler, "event handler");
     
         final boolean highest = unregisterEventHandler(Priority.HIGHEST, eventHandler);
         final boolean high = unregisterEventHandler(Priority.HIGH, eventHandler);

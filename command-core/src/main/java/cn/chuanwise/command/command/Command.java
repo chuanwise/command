@@ -154,7 +154,7 @@ public class Command
      * @param commandInfo 指令信息对象
      */
     public void setCommandInfo(CommandInfo commandInfo) {
-        Preconditions.namedArgumentNonNull(commandInfo, "command info");
+        Preconditions.objectNonNull(commandInfo, "command info");
 
         final List<String> formats = commandInfo.getFormats();
         final List<FormatInfo> newFormatInfo = new ArrayList<>(formats.size());
@@ -196,7 +196,7 @@ public class Command
      */
     @SuppressWarnings("all")
     public <T> T getProperty(Property<T> property, T defaultValue) {
-        Preconditions.namedArgumentNonNull(property, "property");
+        Preconditions.objectNonNull(property, "property");
 
         return (T) properties.getOrDefault(property, defaultValue);
     }
@@ -209,7 +209,7 @@ public class Command
      * @param <T> 属性值类型
      */
     public <T> T setProperty(Property<T> property, T value) {
-        Preconditions.namedArgumentNonNull(property, "property");
+        Preconditions.objectNonNull(property, "property");
     
         return (T) properties.put(property, value);
     }
@@ -232,7 +232,7 @@ public class Command
      */
     @SuppressWarnings("all")
     public <T> T removeProperty(Property<T> property) {
-        Preconditions.namedArgumentNonNull(property, "property");
+        Preconditions.objectNonNull(property, "property");
 
         return (T) properties.remove(property);
     }

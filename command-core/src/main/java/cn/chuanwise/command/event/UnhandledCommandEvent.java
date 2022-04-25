@@ -14,7 +14,7 @@ public class UnhandledCommandEvent
     public UnhandledCommandEvent(DispatchContext dispatchContext, CommandTreeNode commandTreeNode) {
         super(dispatchContext);
 
-        Preconditions.namedArgumentNonNull(commandTreeNode, "command tree");
+        Preconditions.objectNonNull(commandTreeNode, "command tree");
 
         this.commandTreeNode = commandTreeNode;
     }

@@ -38,15 +38,19 @@ public class ExceptionService
      * @return 该异常是否被处理
      */
     public boolean handleException(Throwable cause) {
-        Preconditions.namedArgumentNonNull(cause, "cause");
+        Preconditions.objectNonNull(cause, "cause");
         
         final boolean highest = handleException0(Priority.HIGHEST, cause);
         final boolean high = handleException0(Priority.HIGH, cause);
         final boolean normal = handleException0(Priority.NORMAL, cause);
         final boolean low = handleException0(Priority.LOW, cause);
         final boolean lowest = handleException0(Priority.LOWEST, cause);
-        
-        return highest || high || normal || low || lowest;
+    
+        final boolean handled = highest || high || normal || low || lowest;
+        if (!handled) {
+            cause.printStackTrace();
+        }
+        return handled;
     }
     
     /**
@@ -84,8 +88,8 @@ public class ExceptionService
      * @param exceptionHandler 异常处理器
      */
     public void registerExceptionHandler(ExceptionHandler exceptionHandler, Priority priority) {
-        Preconditions.namedArgumentNonNull(exceptionHandler, "exception handler");
-        Preconditions.namedArgumentNonNull(priority, "priority");
+        Preconditions.objectNonNull(exceptionHandler, "exception handler");
+        Preconditions.objectNonNull(priority, "priority");
         
         final List<ExceptionHandler> exceptionHandlers = Maps.getOrPutGet(this.exceptionHandlers, priority, CopyOnWriteArrayList::new);
         exceptionHandlers.add(exceptionHandler);
@@ -101,9 +105,9 @@ public class ExceptionService
      * @return 异常处理器
      */
     public <T extends Throwable> ExceptionHandler registerExceptionHandler(Class<T> exceptionClass, Priority priority, ExceptionConsumer<T> action) {
-        Preconditions.namedArgumentNonNull(exceptionClass, "exception class");
-        Preconditions.namedArgumentNonNull(priority, "priority");
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(exceptionClass, "exception class");
+        Preconditions.objectNonNull(priority, "priority");
+        Preconditions.objectNonNull(action, "action");
         
         final List<ExceptionHandler> exceptionHandlers = Maps.getOrPutGet(this.exceptionHandlers, priority, CopyOnWriteArrayList::new);
         final SimpleExceptionHandler<T> exceptionHandler = new SimpleExceptionHandler<>(exceptionClass, action);
@@ -131,7 +135,7 @@ public class ExceptionService
      * @return 是否注销该异常处理器
      */
     public boolean unregisterExceptionHandler(ExceptionHandler exceptionHandler) {
-        Preconditions.namedArgumentNonNull(exceptionHandler, "exception handler");
+        Preconditions.objectNonNull(exceptionHandler, "exception handler");
     
         final boolean highest = unregisterExceptionHandler(Priority.HIGHEST, exceptionHandler);
         final boolean high = unregisterExceptionHandler(Priority.HIGH, exceptionHandler);
@@ -172,7 +176,7 @@ public class ExceptionService
      * @param action 可能抛出异常的代码
      */
     public void catching(ExceptionRunnable action) {
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         try {
             action.exceptRun();
@@ -189,7 +193,7 @@ public class ExceptionService
      * @return 代码的返回值
      */
     public <T> T catching(ExceptionSupplier<T> action, T defaultValue) {
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         try {
             return action.exceptGet();

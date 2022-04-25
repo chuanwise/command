@@ -4,11 +4,13 @@ import cn.chuanwise.command.annotation.Wirer;
 import cn.chuanwise.command.context.WireContext;
 import cn.chuanwise.command.Priority;
 import cn.chuanwise.common.space.Container;
+import cn.chuanwise.common.util.Exceptions;
 import cn.chuanwise.common.util.Preconditions;
 import cn.chuanwise.common.util.Reflections;
 import cn.chuanwise.common.util.Types;
 import lombok.Data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -32,8 +34,8 @@ public class MethodWirer<T>
     public MethodWirer(Class<T> wiredClass, Object source, Method method, boolean contained) {
         super(wiredClass);
         
-        Preconditions.namedArgumentNonNull(source, "source");
-        Preconditions.namedArgumentNonNull(method, "method");
+        Preconditions.objectNonNull(source, "source");
+        Preconditions.objectNonNull(method, "method");
         
         this.method = method;
         this.source = source;
@@ -41,10 +43,10 @@ public class MethodWirer<T>
     }
     
     public static <T> MethodWirer of(Object source, Method method) {
-        Preconditions.namedArgumentNonNull(method, "method");
+        Preconditions.objectNonNull(method, "method");
     
         final Wirer wirer = method.getAnnotation(Wirer.class);
-        Preconditions.namedArgumentNonNull(wirer, "方法不具备 @Wirer 注解");
+        Preconditions.objectNonNull(wirer, "方法不具备 @Wirer 注解");
         final Class<T> wiredClass = (Class<T>) wirer.value();
     
         final Class<?> declaringClass = method.getDeclaringClass();
@@ -86,7 +88,13 @@ public class MethodWirer<T>
     @SuppressWarnings("all")
     protected Container<T> wire0(WireContext context) throws Exception {
         if (context.getParameter().getType().isAssignableFrom(wiredClass)) {
-            final Object value = Reflections.invokeMethod(source, method, context);
+            final Object value;
+            try {
+                value = Reflections.invokeMethod(source, method, context);
+            } catch (InvocationTargetException e) {
+                Exceptions.rethrow(e.getCause());
+                return Container.empty();
+            }
     
             if (contained) {
                 return (Container<T>) value;

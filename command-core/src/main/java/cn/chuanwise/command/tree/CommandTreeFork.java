@@ -16,15 +16,15 @@ public class CommandTreeFork
     protected final List<CommandTreeNode.Element> elements = new ArrayList<>();
 
     public CommandTreeFork(CommandTreeNode commandTreeNode, CommandTreeNode.Element firstElement) {
-        Preconditions.namedArgumentNonNull(commandTreeNode, "command tree");
-        Preconditions.namedArgumentNonNull(firstElement, "first element");
+        Preconditions.objectNonNull(commandTreeNode, "command tree");
+        Preconditions.objectNonNull(firstElement, "first element");
 
         this.commandTreeNode = commandTreeNode;
         elements.add(firstElement);
     }
 
     public CommandTreeFork(CommandTreeNode commandTreeNode) {
-        Preconditions.namedArgumentNonNull(commandTreeNode, "command tree");
+        Preconditions.objectNonNull(commandTreeNode, "command tree");
 
         this.commandTreeNode = commandTreeNode;
     }
@@ -148,6 +148,15 @@ public class CommandTreeFork
         elements.addAll(this.elements);
         elements.set(elements.size() - 1, element);
 
+        return fork;
+    }
+    
+    protected CommandTreeFork fork(CommandTreeNode son) {
+        final CommandTreeFork fork = new CommandTreeFork(son);
+    
+        final List<CommandTreeNode.Element> elements = fork.getElements();
+        elements.addAll(this.elements);
+    
         return fork;
     }
 

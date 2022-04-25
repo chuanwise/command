@@ -233,8 +233,9 @@ public class CommandTree
         // 剔除那些不可执行的节点
         final List<CommandTreeFork> forks = dispatch(dispatchContext);
         if (forks.isEmpty()) {
-            final MismatchedFormatEvent event = new MismatchedFormatEvent(dispatchContext, forks);
-            commander.getEventService().broadcastEvent(event);
+            // if failed, event will be broadcasted
+//            final MismatchedFormatEvent event = new MismatchedFormatEvent(dispatchContext, forks);
+//            commander.getEventService().broadcastEvent(event);
             return null;
         }
     
@@ -306,7 +307,7 @@ public class CommandTree
      * 调度出所有可能的分支
      */
     public List<CommandTreeFork> dispatch(DispatchContext dispatchContext) throws Exception {
-        Preconditions.namedArgumentNonNull(dispatchContext, "dispatch context");
+        Preconditions.objectNonNull(dispatchContext, "dispatch context");
     
         final List<String> arguments = dispatchContext.getArguments();
         if (arguments.isEmpty()) {
@@ -361,6 +362,11 @@ public class CommandTree
             for (CommandTreeNode son : fork.getCommandTreeNode().getSons()) {
                 if (son instanceof NullableOptionalParameterCommandTreeNode) {
                     nullableNextForks.add(fork.forkWith(son, new CommandTreeNode.ValueElement("")));
+                    continue;
+                }
+                if (son instanceof OptionCommandTreeNode) {
+                    nullableNextForks.add(fork.fork(son));
+                    continue;
                 }
             }
         }
@@ -370,6 +376,7 @@ public class CommandTree
         forks.removeIf(x -> !x.commandTreeNode.isExecutable());
         if (forks.isEmpty()) {
             commander.getEventService().broadcastEvent(new MismatchedFormatEvent(dispatchContext, clonedForks));
+            return Collections.emptyList();
         }
     
         return Collections.unmodifiableList(forks);
@@ -379,7 +386,7 @@ public class CommandTree
      * 指令补全
      */
     public Set<String> complete(DispatchContext dispatchContext, boolean uncompleted) throws Exception {
-        Preconditions.namedArgumentNonNull(dispatchContext, "dispatch context");
+        Preconditions.objectNonNull(dispatchContext, "dispatch context");
     
         final Set<String> set = new HashSet<>();
         final List<String> arguments = dispatchContext.getArguments();
@@ -579,15 +586,15 @@ public class CommandTree
         protected CommandTreeNode commandTreeNode;
         
         public CommandRegisterFork(Command command, CommandTreeNode commandTreeNode) {
-            Preconditions.namedArgumentNonNull(command, "command");
-            Preconditions.namedArgumentNonNull(commandTreeNode, "command tree");
+            Preconditions.objectNonNull(command, "command");
+            Preconditions.objectNonNull(commandTreeNode, "command tree");
             
             this.commandTreeNode = commandTreeNode;
             this.command = command;
         }
         
         public List<CommandRegisterFork> accept(FormatElement element) {
-            Preconditions.namedArgumentNonNull(element, "format element");
+            Preconditions.objectNonNull(element, "format element");
             
             if (element instanceof PlainTextsFormatElement) {
                 final PlainTextsFormatElement plainTexts = (PlainTextsFormatElement) element;
@@ -659,7 +666,7 @@ public class CommandTree
      * 注册指令
      */
     public void registerCommand(Command command) {
-        Preconditions.namedArgumentNonNull(command, "command");
+        Preconditions.objectNonNull(command, "command");
     
         // 激发事件
         final CommandRegisterEvent commandRegisterEvent = new CommandRegisterEvent(command);

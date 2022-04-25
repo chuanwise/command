@@ -21,8 +21,8 @@ public class WireEvent
                      Wirer wirer) {
         super(commandContext);
 
-        Preconditions.namedArgumentNonNull(parameter, "parameter");
-        Preconditions.namedArgumentNonNull(wirer, "provider");
+        Preconditions.objectNonNull(parameter, "parameter");
+        Preconditions.objectNonNull(wirer, "provider");
         Preconditions.argument(index >= 0, "index");
 
         this.parameter = parameter;

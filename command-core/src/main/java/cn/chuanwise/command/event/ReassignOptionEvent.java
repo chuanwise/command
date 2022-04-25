@@ -15,8 +15,8 @@ public class ReassignOptionEvent
     public ReassignOptionEvent(DispatchContext dispatchContext, OptionInfo optionInfo, String firstString, String secondString) {
         super(dispatchContext, optionInfo);
 
-        Preconditions.namedArgumentNonNull(firstString, "first string");
-        Preconditions.namedArgumentNonNull(secondString, "second string");
+        Preconditions.objectNonNull(firstString, "first string");
+        Preconditions.objectNonNull(secondString, "second string");
 
         this.firstString = firstString;
         this.secondString = secondString;

@@ -18,7 +18,7 @@ public abstract class AbstractEventHandler<T>
     protected final Class<T> eventClass;
 
     public AbstractEventHandler(Class<T> eventClass) {
-        Preconditions.namedArgumentNonNull(eventClass, "event class");
+        Preconditions.objectNonNull(eventClass, "event class");
 
         this.eventClass = eventClass;
     }

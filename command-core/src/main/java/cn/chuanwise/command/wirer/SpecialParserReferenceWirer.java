@@ -16,7 +16,7 @@ public class SpecialParserReferenceWirer<T>
     public SpecialParserReferenceWirer(Parser parser, Class<T> filledClass, ParameterInfo parameterInfo) {
         super(filledClass, parameterInfo);
 
-        Preconditions.namedArgumentNonNull(parser, "parser");
+        Preconditions.objectNonNull(parser, "parser");
 
         this.parser = parser;
     }

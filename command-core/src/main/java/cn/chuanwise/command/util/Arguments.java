@@ -29,7 +29,7 @@ public class Arguments
     }
 
     public static List<String> split(String text, char escapeChar, boolean includeDoubleQuotes) {
-        Preconditions.namedArgumentNonNull(text, "text");
+        Preconditions.objectNonNull(text, "text");
 
         if (text.isEmpty()) {
             return Collections.emptyList();
@@ -86,7 +86,7 @@ public class Arguments
     }
 
     public static String merge(String[] arguments) {
-        Preconditions.namedArgumentNonNull(arguments, "arguments");
+        Preconditions.objectNonNull(arguments, "arguments");
 
         if (arguments.length == 0) {
             return "";

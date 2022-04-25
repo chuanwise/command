@@ -11,7 +11,7 @@ public class PlainTextsFormatElement extends FormatElement {
 
     @Override
     public String getCompletedFormat() {
-        return Joiner.builder().delimiter("|").build().withAll(texts).join();
+        return Joiner.builder().delimiter("|").build().plus(texts).join();
     }
 
     @Override

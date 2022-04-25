@@ -26,8 +26,8 @@ public class ParseContext
                         Class<?> requiredClass) {
         super(commandSender, referenceInfo, command);
 
-        Preconditions.namedArgumentNonNull(parsingReferenceInfo, "parsing reference info");
-        Preconditions.namedArgumentNonNull(requiredClass, "required class");
+        Preconditions.objectNonNull(parsingReferenceInfo, "parsing reference info");
+        Preconditions.objectNonNull(requiredClass, "required class");
 
         this.parsingReferenceInfo = parsingReferenceInfo;
         this.requiredClass = requiredClass;

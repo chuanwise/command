@@ -6,6 +6,7 @@ import cn.chuanwise.command.command.MethodCommandExecutor;
 import cn.chuanwise.command.completer.MethodCompleter;
 import cn.chuanwise.command.configuration.CommanderConfiguration;
 import cn.chuanwise.command.context.DispatchContext;
+import cn.chuanwise.command.event.MethodEventHandler;
 import cn.chuanwise.command.event.MethodRegisterEvent;
 import cn.chuanwise.command.exception.MethodExceptionHandler;
 import cn.chuanwise.command.format.FormatInfo;
@@ -68,7 +69,7 @@ public class Commander {
      * @param commanderConfiguration 配置
      */
     public Commander(CommanderConfiguration commanderConfiguration) {
-        Preconditions.namedArgumentNonNull(commanderConfiguration, "configuration");
+        Preconditions.objectNonNull(commanderConfiguration, "configuration");
     
         this.commanderConfiguration = commanderConfiguration;
     }
@@ -84,7 +85,7 @@ public class Commander {
      * 注册所有方法
      */
     public Commander register(Object source) {
-        Preconditions.namedArgumentNonNull(source, "source object");
+        Preconditions.objectNonNull(source, "source object");
     
         final Method[] methods = source.getClass().getDeclaredMethods();
         for (Method method : methods) {
@@ -113,6 +114,11 @@ public class Commander {
             final cn.chuanwise.command.annotation.ExceptionHandler exceptionHandler = method.getAnnotation(cn.chuanwise.command.annotation.ExceptionHandler.class);
             if (Objects.nonNull(exceptionHandler)) {
                 exceptionService.registerExceptionHandler(MethodExceptionHandler.of(source, method), exceptionHandler.priority());
+            }
+    
+            final cn.chuanwise.command.annotation.EventHandler eventHandler = method.getAnnotation(cn.chuanwise.command.annotation.EventHandler.class);
+            if (Objects.nonNull(eventHandler)) {
+                eventService.registerEventHandler(MethodEventHandler.of(source, method), eventHandler.priority(), eventHandler.alwaysValid());
             }
     
             final Command commandAnnotation = method.getAnnotation(Command.class);

@@ -25,7 +25,7 @@ public class WireContext
                        Parameter parameter) {
         super(commandSender, referenceInfo, command);
 
-        Preconditions.namedArgumentNonNull(parameter, "parameter");
+        Preconditions.objectNonNull(parameter, "parameter");
 
         this.parameter = parameter;
     }

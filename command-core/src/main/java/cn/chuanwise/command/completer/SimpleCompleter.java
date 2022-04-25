@@ -23,7 +23,7 @@ public class SimpleCompleter
     public SimpleCompleter(Class<?> completedClass, ExceptionFunction<CompleteContext, Set<String>> action) {
         super(completedClass);
     
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         this.action = action;
     }

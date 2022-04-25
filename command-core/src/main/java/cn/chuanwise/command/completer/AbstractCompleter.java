@@ -26,7 +26,7 @@ public abstract class AbstractCompleter
     protected final Class<?> completedClass;
     
     public AbstractCompleter(Class<?> completedClass) {
-        Preconditions.namedArgumentNonNull(completedClass, "completed class");
+        Preconditions.objectNonNull(completedClass, "completed class");
 
         this.completedClass = completedClass;
     }

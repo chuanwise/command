@@ -17,7 +17,7 @@ public abstract class AbstractExceptionHandler<T extends Throwable>
     private final Class<T> exceptionClass;
     
     public AbstractExceptionHandler(Class<T> exceptionClass) {
-        Preconditions.namedArgumentNonNull(exceptionClass, "exception class");
+        Preconditions.objectNonNull(exceptionClass, "exception class");
         
         this.exceptionClass = exceptionClass;
     }
@@ -30,7 +30,7 @@ public abstract class AbstractExceptionHandler<T extends Throwable>
     @Override
     @SuppressWarnings("all")
     public final boolean handleException(Throwable cause) throws Exception {
-        Preconditions.namedArgumentNonNull(cause, "cause");
+        Preconditions.objectNonNull(cause, "cause");
     
         if (exceptionClass.isInstance(cause)) {
             return handleException0((T) cause);

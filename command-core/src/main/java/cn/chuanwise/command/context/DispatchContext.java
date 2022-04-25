@@ -15,8 +15,8 @@ import java.util.List;
 @Data
 @SuppressWarnings("all")
 public class DispatchContext
-        extends CommanderContext
-        implements CommandSenderHolder {
+    extends CommanderContext
+    implements CommandSenderHolder {
 
     protected final Object commandSender;
     protected final List<String> arguments;

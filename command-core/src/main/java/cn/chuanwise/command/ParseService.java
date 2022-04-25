@@ -47,8 +47,8 @@ public class ParseService
      * @param parser 解析器
      */
     public void registerParser(Parser parser, Priority priority) {
-        Preconditions.namedArgumentNonNull(parser, "parser");
-        Preconditions.namedArgumentNonNull(priority, "priority");
+        Preconditions.objectNonNull(parser, "parser");
+        Preconditions.objectNonNull(priority, "priority");
         
         Maps.getOrPutGet(parsers, priority, CopyOnWriteArrayList::new).add(parser);
     }
@@ -63,9 +63,9 @@ public class ParseService
      * @return 被注册的解析器
      */
     public <T> Parser registerParser(Class<T> parsedClass, Priority priority, ExceptionFunction<ParseContext, Container<T>> action) {
-        Preconditions.namedArgumentNonNull(parsedClass, "parsed class");
-        Preconditions.namedArgumentNonNull(action, "action");
-        Preconditions.namedArgumentNonNull(priority, "priority");
+        Preconditions.objectNonNull(parsedClass, "parsed class");
+        Preconditions.objectNonNull(action, "action");
+        Preconditions.objectNonNull(priority, "priority");
         
         final List<Parser> parsers = Maps.getOrPutGet(this.parsers, priority, CopyOnWriteArrayList::new);
         final SimpleParser<T> parser = new SimpleParser<>(parsedClass, action);
@@ -93,7 +93,7 @@ public class ParseService
      * @return 是否卸载了该解析器
      */
     public boolean unregisterParser(Parser parser) {
-        Preconditions.namedArgumentNonNull(parser, "parser");
+        Preconditions.objectNonNull(parser, "parser");
     
         final boolean highest = unregisterParser(Priority.HIGHEST, parser);
         final boolean high = unregisterParser(Priority.HIGH, parser);
@@ -133,7 +133,7 @@ public class ParseService
      * @return 解析结果
      */
     public Container<?> parse(ParseContext context) {
-        Preconditions.namedArgumentNonNull(context, "context");
+        Preconditions.objectNonNull(context, "context");
         
         final Container<?> highest = parse0(Priority.HIGHEST, context);
         if (!highest.isEmpty()) {

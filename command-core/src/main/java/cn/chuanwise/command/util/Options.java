@@ -19,8 +19,8 @@ public class Options
     extends StaticUtilities {
 
     public static Set<String> complete(CommanderConfiguration.Option option, OptionInfo optionInfo, Collection<String> values) {
-        Preconditions.namedArgumentNonNull(optionInfo, "option info");
-        Preconditions.namedArgumentNonNull(values, "values");
+        Preconditions.objectNonNull(optionInfo, "option info");
+        Preconditions.objectNonNull(values, "values");
 
         if (values.isEmpty()) {
             return Collections.emptySet();

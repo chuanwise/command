@@ -27,14 +27,14 @@ public class EventManager
     }
     
     public void registerEventHandler(EventHandler eventHandler, Priority priority) {
-        Preconditions.namedArgumentNonNull(eventHandler, "event handler");
-        Preconditions.namedArgumentNonNull(priority, "priority");
+        Preconditions.objectNonNull(eventHandler, "event handler");
+        Preconditions.objectNonNull(priority, "priority");
     
         Maps.getOrPutGet(eventHandlers, priority, CopyOnWriteArrayList::new).add(eventHandler);
     }
     
     public void broadcastEvent(Object event) {
-        Preconditions.namedArgumentNonNull(event, "event");
+        Preconditions.objectNonNull(event, "event");
         
         
     }

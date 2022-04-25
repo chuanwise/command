@@ -49,7 +49,7 @@ public class PlainTextsCommandTreeNode
 
     @Override
     public String getCompleteUsage() {
-        return Joiner.builder().delimiter("|").build().withAll(texts).join();
+        return Joiner.builder().delimiter("|").build().plus(texts).join();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class PlainTextsCommandTreeNode
     }
 
     public void merge(PlainTextsCommandTreeNode commandTree) {
-        Preconditions.namedArgumentNonNull(commandTree, "command tree");
+        Preconditions.objectNonNull(commandTree, "command tree");
 
         Preconditions.state(Objects.isNull(command) || Objects.isNull(commandTree.command), "无法将两个已注册的指令合并");
 

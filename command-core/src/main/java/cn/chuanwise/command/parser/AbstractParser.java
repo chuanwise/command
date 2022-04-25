@@ -19,7 +19,7 @@ public abstract class AbstractParser<T>
     private final Class<T> parsedClass;
     
     public AbstractParser(Class<T> parsedClass) {
-        Preconditions.namedArgumentNonNull(parsedClass, "parsed class");
+        Preconditions.objectNonNull(parsedClass, "parsed class");
         
         this.parsedClass = parsedClass;
     }

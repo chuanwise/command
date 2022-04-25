@@ -16,8 +16,8 @@ public class UndefinedOptionValueEvent
     public UndefinedOptionValueEvent(DispatchContext dispatchContext, OptionInfo optionInfo, String string, Command command) {
         super(dispatchContext, optionInfo);
 
-        Preconditions.namedArgumentNonNull(command, "command");
-        Preconditions.namedArgumentNonNull(string, "string");
+        Preconditions.objectNonNull(command, "command");
+        Preconditions.objectNonNull(string, "string");
 
         this.string = string;
         this.command = command;

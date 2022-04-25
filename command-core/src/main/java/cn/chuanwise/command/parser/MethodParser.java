@@ -3,11 +3,13 @@ package cn.chuanwise.command.parser;
 import cn.chuanwise.command.context.ParseContext;
 import cn.chuanwise.command.Priority;
 import cn.chuanwise.common.space.Container;
+import cn.chuanwise.common.util.Exceptions;
 import cn.chuanwise.common.util.Preconditions;
 import cn.chuanwise.common.util.Reflections;
 import cn.chuanwise.common.util.Types;
 import lombok.Data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -31,8 +33,8 @@ public class MethodParser<T>
     public MethodParser(Class<T> parsedClass, Priority priority, Object source, Method method, boolean contained) {
         super(parsedClass);
         
-        Preconditions.namedArgumentNonNull(source, "source");
-        Preconditions.namedArgumentNonNull(method, "method");
+        Preconditions.objectNonNull(source, "source");
+        Preconditions.objectNonNull(method, "method");
         
         this.source = source;
         this.method = method;
@@ -40,10 +42,10 @@ public class MethodParser<T>
     }
     
     public static <T> MethodParser of(Object source, Method method) {
-        Preconditions.namedArgumentNonNull(method, "method");
+        Preconditions.objectNonNull(method, "method");
     
         final cn.chuanwise.command.annotation.Parser parser = method.getAnnotation(cn.chuanwise.command.annotation.Parser.class);
-        Preconditions.namedArgumentNonNull(parser, "方法不具备 @Parser 注解");
+        Preconditions.objectNonNull(parser, "方法不具备 @Parser 注解");
     
         final Class<?> declaringClass = method.getDeclaringClass();
         if (Modifier.isStatic(method.getModifiers())) {
@@ -77,7 +79,13 @@ public class MethodParser<T>
     @Override
     @SuppressWarnings("all")
     protected Container<T> parse0(ParseContext context) throws Exception {
-        final Object object = Reflections.invokeMethod(source, method, context);
+        final Object object;
+        try {
+            object = Reflections.invokeMethod(source, method, context);
+        } catch (InvocationTargetException e) {
+            Exceptions.rethrow(e.getCause());
+            return Container.empty();
+        }
     
         if (contained) {
             return (Container<T>) object;

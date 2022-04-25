@@ -8,11 +8,13 @@ import cn.chuanwise.command.Priority;
 import cn.chuanwise.command.tree.CommandTreeNode;
 import cn.chuanwise.command.tree.OptionCommandTreeNode;
 import cn.chuanwise.command.tree.ParameterCommandTreeNode;
+import cn.chuanwise.common.util.Exceptions;
 import cn.chuanwise.common.util.Preconditions;
 import cn.chuanwise.common.util.Reflections;
 import cn.chuanwise.common.util.Types;
 import lombok.Data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -36,13 +38,13 @@ public class MethodCompleter
     private final Priority priority;
     
     public MethodCompleter(Priority priority, Object source, Method method) {
-        Preconditions.namedArgumentNonNull(priority, "priority");
-        Preconditions.namedArgumentNonNull(method, "method");
+        Preconditions.objectNonNull(priority, "priority");
+        Preconditions.objectNonNull(method, "method");
         
         this.priority = priority;
         
         final Completer completer = method.getAnnotation(Completer.class);
-        Preconditions.namedArgumentNonNull(completer, "方法不具备 @Completer 注解");
+        Preconditions.objectNonNull(completer, "方法不具备 @Completer 注解");
         final Class<?>[] completedClasses = completer.value();
 
         Preconditions.argument(completedClasses.length != 0, "方法具备 @Completer 注解，但是没有指定任何补全类型");
@@ -127,7 +129,13 @@ public class MethodCompleter
 
     @SuppressWarnings("all")
     private Collection<String> complete0(CompleteContext context) throws Exception {
-        final Object result = Reflections.invokeMethod(source, method, context);
+        final Object result;
+        try {
+            result = Reflections.invokeMethod(source, method, context);
+        } catch (InvocationTargetException e) {
+            Exceptions.rethrow(e.getCause());
+            return Collections.emptySet();
+        }
         return (Collection<String>) result;
     }
 }

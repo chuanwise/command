@@ -21,8 +21,8 @@ public class OptionInfo
     public OptionInfo(String name, Set<String> aliases, Set<String> optionalValues, String defaultValue) {
         super(name);
 
-        Preconditions.namedArgumentNonNull(aliases, "aliases");
-        Preconditions.namedArgumentNonNull(optionalValues, "optional values");
+        Preconditions.objectNonNull(aliases, "aliases");
+        Preconditions.objectNonNull(optionalValues, "optional values");
 
         this.aliases = aliases;
         this.optionalValues = optionalValues;

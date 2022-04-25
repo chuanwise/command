@@ -18,8 +18,8 @@ public class ReferenceInfo {
     protected final ParameterInfo parameterInfo;
 
     public ReferenceInfo(ParameterInfo parameterInfo, String string) {
-        Preconditions.namedArgumentNonNull(parameterInfo, "parameter info");
-        Preconditions.namedArgumentNonNull(string, "reference string");
+        Preconditions.objectNonNull(parameterInfo, "parameter info");
+        Preconditions.objectNonNull(string, "reference string");
 
         this.name = parameterInfo.getName();
         this.string = string;

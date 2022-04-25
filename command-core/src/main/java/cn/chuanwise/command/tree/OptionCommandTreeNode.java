@@ -85,7 +85,7 @@ public class OptionCommandTreeNode
             return Joiner.builder()
                 .delimiter(" ")
                 .build()
-                .withAll(optionInfo, x -> "[-" + x.getName() + "]")
+                .plus(optionInfo, x -> "[-" + x.getName() + "]")
                 .join();
         }
     }
@@ -98,7 +98,7 @@ public class OptionCommandTreeNode
             return Joiner.builder()
                 .delimiter(" ")
                 .build()
-                .withAll(optionInfo, x -> {
+                .plus(optionInfo, x -> {
                     final StringBuilder stringBuilder = new StringBuilder(x.getName());
     
                     // | aliases
@@ -117,7 +117,7 @@ public class OptionCommandTreeNode
                             .prefix("=")
                             .delimiter("|")
                             .build()
-                            .withAll(optionalValues)
+                            .plus(optionalValues)
                             .join()
                         );
                     }

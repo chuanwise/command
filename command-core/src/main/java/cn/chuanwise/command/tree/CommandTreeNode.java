@@ -26,7 +26,7 @@ public abstract class CommandTreeNode
     public CommandTreeNode(CommandTreeNode parent, Commander commander) {
         super(commander);
 
-        Preconditions.namedArgumentNonNull(parent, "parent command tree");
+        Preconditions.objectNonNull(parent, "parent command tree");
 
         this.parent = parent;
     }
@@ -66,7 +66,7 @@ public abstract class CommandTreeNode
         public OptionElement(String string, OptionInfo optionInfo) {
             super(string);
 
-            Preconditions.namedArgumentNonNull(optionInfo, "option info");
+            Preconditions.objectNonNull(optionInfo, "option info");
 
             this.optionInfo = optionInfo;
         }
@@ -81,7 +81,7 @@ public abstract class CommandTreeNode
 
     @SuppressWarnings("unchecked")
     public <T extends CommandTreeNode> List<T> addSon(T son) {
-        Preconditions.namedArgumentNonNull(son, "son");
+        Preconditions.objectNonNull(son, "son");
 
         final List<T> list = CommandTreeNodes.addSon(sons, son);
         for (T t : list) {

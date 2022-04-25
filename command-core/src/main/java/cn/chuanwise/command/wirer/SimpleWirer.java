@@ -23,13 +23,13 @@ public class SimpleWirer<T>
     public SimpleWirer(Class<T> wiredClass, ExceptionFunction<WireContext, Container<T>> action) {
         super(wiredClass);
     
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         this.action = action;
     }
     
     public SimpleWirer(ExceptionFunction<WireContext, Container<T>> action) {
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         this.action = action;
     }

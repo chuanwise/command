@@ -1,10 +1,12 @@
 package cn.chuanwise.command.exception;
 
 import cn.chuanwise.command.Priority;
+import cn.chuanwise.common.util.Exceptions;
 import cn.chuanwise.common.util.Preconditions;
 import cn.chuanwise.common.util.Reflections;
 import lombok.Data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -25,8 +27,8 @@ public class MethodExceptionHandler<T extends Throwable>
     protected MethodExceptionHandler(Class<T> exceptionClass, Object source, Method method) {
         super(exceptionClass);
     
-        Preconditions.namedArgumentNonNull(source, "source");
-        Preconditions.namedArgumentNonNull(method, "method");
+        Preconditions.objectNonNull(source, "source");
+        Preconditions.objectNonNull(method, "method");
         
         this.source = source;
         this.method = method;
@@ -34,10 +36,10 @@ public class MethodExceptionHandler<T extends Throwable>
     
     @SuppressWarnings("all")
     public static MethodExceptionHandler of(Object source, Method method) {
-        Preconditions.namedArgumentNonNull(method, "method");
+        Preconditions.objectNonNull(method, "method");
         
         final cn.chuanwise.command.annotation.ExceptionHandler exceptionHandler = method.getAnnotation(cn.chuanwise.command.annotation.ExceptionHandler.class);
-        Preconditions.namedArgumentNonNull(exceptionHandler, "方法不具备 @EventHandler 注解");
+        Preconditions.objectNonNull(exceptionHandler, "方法不具备 @EventHandler 注解");
 
         final Class<?> declaringClass = method.getDeclaringClass();
         if (Modifier.isStatic(method.getModifiers())) {
@@ -60,7 +62,13 @@ public class MethodExceptionHandler<T extends Throwable>
 
     @Override
     protected boolean handleException0(T cause) throws Exception {
-        final Object returnValue = Reflections.invokeMethod(source, method, cause);
+        final Object returnValue;
+        try {
+            returnValue = Reflections.invokeMethod(source, method, cause);
+        } catch (InvocationTargetException e) {
+            Exceptions.rethrow(e.getCause());
+            return false;
+        }
         if (returnValue instanceof Boolean) {
             return (Boolean) returnValue;
         } else {

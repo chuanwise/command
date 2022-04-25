@@ -30,9 +30,9 @@ public class CompleteContext
     public CompleteContext(Commander commander, Object commandSender, List<String> arguments, CommandTreeFork commandTreeFork, String string) {
         super(commander);
 
-        Preconditions.namedArgumentNonNull(commandTreeFork, "command tree forks");
-        Preconditions.namedArgumentNonNull(arguments, "arguments");
-        Preconditions.namedArgumentNonNull(string, "string");
+        Preconditions.objectNonNull(commandTreeFork, "command tree forks");
+        Preconditions.objectNonNull(arguments, "arguments");
+        Preconditions.objectNonNull(string, "string");
 
         this.commandSender = commandSender;
         this.arguments = arguments;

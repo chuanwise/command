@@ -23,7 +23,7 @@ public class CommandInfoConfigurationEventHandler
     protected final CommandInfoConfiguration configuration;
     
     public CommandInfoConfigurationEventHandler(CommandInfoConfiguration configuration) {
-        Preconditions.namedArgumentNonNull(configuration, "configuration");
+        Preconditions.objectNonNull(configuration, "configuration");
         
         this.configuration = configuration;
     }

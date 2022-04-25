@@ -30,7 +30,7 @@ public abstract class AbstractClassHandler<T>
     protected final Class<T> handledClass;
     
     public AbstractClassHandler(Class<T> handledClass) {
-        Preconditions.namedArgumentNonNull(handledClass, "handled class");
+        Preconditions.objectNonNull(handledClass, "handled class");
 
         this.handledClass = handledClass;
     }

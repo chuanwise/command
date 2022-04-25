@@ -20,7 +20,7 @@ public class WireMismatchedEvent
                                Object wiredObject) {
         super(commandContext, index, parameter, wirer);
 
-        Preconditions.namedArgumentNonNull(wiredObject, "wired object");
+        Preconditions.objectNonNull(wiredObject, "wired object");
 
         this.providedObject = wiredObject;
     }

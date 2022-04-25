@@ -22,7 +22,7 @@ public @interface Reference {
      *
      * @return 变量名
      */
-    String value();
+    String value() default "";
     
     /**
      * 特定的补全器

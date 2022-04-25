@@ -27,8 +27,8 @@ public class CommandInfo {
     }
 
     public CommandInfo(List<String> formats, Map<Property<?>, Object> properties) {
-        Preconditions.namedArgumentNonNull(formats, "format");
-        Preconditions.namedArgumentNonNull(properties, "properties");
+        Preconditions.objectNonNull(formats, "format");
+        Preconditions.objectNonNull(properties, "properties");
 
         this.formats = formats;
         this.properties = properties;

@@ -46,8 +46,8 @@ public class WireService
      * @param wirer 装配器
      */
     public void registerWirer(Wirer wirer, Priority priority) {
-        Preconditions.namedArgumentNonNull(wirer, "wirer");
-        Preconditions.namedArgumentNonNull(priority, "priority");
+        Preconditions.objectNonNull(wirer, "wirer");
+        Preconditions.objectNonNull(priority, "priority");
         
         Maps.getOrPutGet(wirers, priority, CopyOnWriteArrayList::new).add(wirer);
     }
@@ -62,9 +62,9 @@ public class WireService
      * @return 被注册的装配器
      */
     public <T> Wirer registerWirer(Class<T> wiredClass, Priority priority, ExceptionFunction<WireContext, Container<T>> action) {
-        Preconditions.namedArgumentNonNull(wiredClass, "event class");
-        Preconditions.namedArgumentNonNull(action, "action");
-        Preconditions.namedArgumentNonNull(priority, "priority");
+        Preconditions.objectNonNull(wiredClass, "event class");
+        Preconditions.objectNonNull(action, "action");
+        Preconditions.objectNonNull(priority, "priority");
         
         final List<Wirer> wirers = Maps.getOrPutGet(this.wirers, priority, CopyOnWriteArrayList::new);
         final SimpleWirer<T> wirer = new SimpleWirer<>(wiredClass, action);
@@ -92,7 +92,7 @@ public class WireService
      * @return 是否卸载了该装配器
      */
     public boolean unregisterWirer(Wirer wirer) {
-        Preconditions.namedArgumentNonNull(wirer, "wirer");
+        Preconditions.objectNonNull(wirer, "wirer");
     
         final boolean highest = unregisterWirer(Priority.HIGHEST, wirer);
         final boolean high = unregisterWirer(Priority.HIGH, wirer);
@@ -110,7 +110,7 @@ public class WireService
      * @return 装配结果
      */
     public Container<?> wire(WireContext context) {
-        Preconditions.namedArgumentNonNull(context, "context");
+        Preconditions.objectNonNull(context, "context");
         
         final Container<?> highest = wire0(Priority.HIGHEST, context);
         if (!highest.isEmpty()) {

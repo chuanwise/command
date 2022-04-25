@@ -20,7 +20,7 @@ public abstract class CommandDispatchOptionEvent
     public CommandDispatchOptionEvent(DispatchContext dispatchContext, OptionInfo optionInfo) {
         super(dispatchContext);
 
-        Preconditions.namedArgumentNonNull(optionInfo, "option info");
+        Preconditions.objectNonNull(optionInfo, "option info");
 
         this.optionInfo = optionInfo;
     }

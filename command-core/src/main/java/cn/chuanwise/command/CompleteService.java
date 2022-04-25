@@ -43,7 +43,7 @@ public class CompleteService
      * @return 补全出的选项
      */
     public Set<String> complete(CompleteContext context) {
-        Preconditions.namedArgumentNonNull(context, "complete context");
+        Preconditions.objectNonNull(context, "complete context");
         
         final Set<String> set = new HashSet<>();
         
@@ -72,8 +72,8 @@ public class CompleteService
      * @param priority 优先级
      */
     public void registerCompleter(Completer completer, Priority priority) {
-        Preconditions.namedArgumentNonNull(completer, "completer");
-        Preconditions.namedArgumentNonNull(priority, "priority");
+        Preconditions.objectNonNull(completer, "completer");
+        Preconditions.objectNonNull(priority, "priority");
         
         Maps.getOrPutGet(completers, priority, CopyOnWriteArrayList::new).add(completer);
     }
@@ -87,9 +87,9 @@ public class CompleteService
      * @return 被注册的补全器
      */
     public Completer registerCompleter(Class<?> completedClass, Priority priority, ExceptionFunction<CompleteContext, Set<String>> action) {
-        Preconditions.namedArgumentNonNull(completedClass, "completed class");
-        Preconditions.namedArgumentNonNull(action, "action");
-        Preconditions.namedArgumentNonNull(priority, "priority");
+        Preconditions.objectNonNull(completedClass, "completed class");
+        Preconditions.objectNonNull(action, "action");
+        Preconditions.objectNonNull(priority, "priority");
         
         final List<Completer> completers = Maps.getOrPutGet(this.completers, priority, CopyOnWriteArrayList::new);
         final SimpleCompleter completer = new SimpleCompleter(completedClass, action);
@@ -116,7 +116,7 @@ public class CompleteService
      * @return 是否卸载了该补全器
      */
     public boolean unregisterCompleter(Completer completer) {
-        Preconditions.namedArgumentNonNull(completer, "completer");
+        Preconditions.objectNonNull(completer, "completer");
     
         final boolean highest = unregisterCompleter(Priority.HIGHEST, completer);
         final boolean high = unregisterCompleter(Priority.HIGH, completer);

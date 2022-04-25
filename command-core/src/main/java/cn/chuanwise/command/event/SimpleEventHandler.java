@@ -21,13 +21,13 @@ public class SimpleEventHandler<T>
     public SimpleEventHandler(Class<T> eventClass, ExceptionConsumer<T> action) {
         super(eventClass);
     
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         this.action = action;
     }
     
     public SimpleEventHandler(ExceptionConsumer<T> action) {
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         this.action = action;
     }

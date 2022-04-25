@@ -16,7 +16,7 @@ public class MismatchedFormatEvent
     public MismatchedFormatEvent(DispatchContext dispatchContext, List<CommandTreeFork> commandTreeForks) {
         super(dispatchContext);
 
-        Preconditions.namedArgumentNonNull(commandTreeForks, "command tree forks");
+        Preconditions.objectNonNull(commandTreeForks, "command tree forks");
 
         this.commandTreeForks = commandTreeForks;
     }

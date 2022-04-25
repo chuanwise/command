@@ -19,7 +19,7 @@ public abstract class AbstractWirer<T>
     protected final Class<T> wiredClass;
     
     public AbstractWirer(Class<T> wiredClass) {
-        Preconditions.namedArgumentNonNull(wiredClass, "wired class");
+        Preconditions.objectNonNull(wiredClass, "wired class");
 
         this.wiredClass = wiredClass;
     }

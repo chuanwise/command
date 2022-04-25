@@ -13,7 +13,7 @@ class CommandTreeNodes
     // 检查添加子节点，或使用现有节点
     @SuppressWarnings("all")
     public static <T extends CommandTreeNode> List<T> addSon(List<CommandTreeNode> sons, T newSon) {
-        Preconditions.namedArgumentNonNull(sons, "sons");
+        Preconditions.objectNonNull(sons, "sons");
 
         final CommanderConfiguration configuration = newSon.getCommander().getCommanderConfiguration();
 

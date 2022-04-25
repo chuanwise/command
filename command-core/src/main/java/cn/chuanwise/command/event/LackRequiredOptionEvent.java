@@ -15,7 +15,7 @@ public class LackRequiredOptionEvent
     public LackRequiredOptionEvent(DispatchContext dispatchContext, Command command, OptionInfo optionInfo) {
         super(dispatchContext, optionInfo);
 
-        Preconditions.namedArgumentNonNull(command, "command");
+        Preconditions.objectNonNull(command, "command");
 
         this.command = command;
     }

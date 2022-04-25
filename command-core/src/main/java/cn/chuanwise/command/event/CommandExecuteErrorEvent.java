@@ -14,7 +14,7 @@ public class CommandExecuteErrorEvent
     public CommandExecuteErrorEvent(CommandContext commandContext, Throwable cause) {
         super(commandContext);
 
-        Preconditions.namedArgumentNonNull(cause, "cause");
+        Preconditions.objectNonNull(cause, "cause");
 
         this.cause = cause;
     }

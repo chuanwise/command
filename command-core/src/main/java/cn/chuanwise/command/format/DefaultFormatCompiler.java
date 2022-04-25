@@ -43,7 +43,6 @@ public class DefaultFormatCompiler
 
         final List<FormatElement> elementList = new ArrayList<FormatElement>();
         final Map<String, FormatElement> environment = new HashMap();
-        boolean afterDefaultOperator;
 
         for (int charIndex = 0; charIndex < length; charIndex++) {
             final char ch = text.charAt(charIndex);
@@ -65,7 +64,7 @@ public class DefaultFormatCompiler
                 }
                 case PLAIN_TEXT: {
                     if (ch == SPACE) {
-                        final String[] strings = stringBuffer1.toString().split(Pattern.quote("|"));
+                        final String[] strings = stringBuffer1.toString().split(Pattern.quote("|"), 0);
                         stringBuffer1.setLength(0);
                         check(Arrays.nonEmpty(strings), originalText, charIndex, "解析器错误：普通文本为空！");
 
@@ -127,7 +126,7 @@ public class DefaultFormatCompiler
                             check(stringBuffer1.length() > 0, originalText, charIndex, "选项名不能为空！");
                             stringBuffer1.setLength(0);
                             final Set<String> aliases = new HashSet<>();
-                            final String[] strings = names.split(Pattern.quote("|"));
+                            final String[] strings = names.split(Pattern.quote("|"), 0);
                             for (String string : strings) {
                                 check(Strings.nonEmpty(string), originalText, charIndex, "选项名不能为空！");
                                 check(!environment.containsKey(string), originalText, charIndex, "参数 " + string + " 重定义！");
@@ -157,7 +156,6 @@ public class DefaultFormatCompiler
                     switch (ch) {
                         case DEFAULT_OPERATOR: {
                             state = CompileState.NULLABLE_PARAMETER_DECLARE;
-                            afterDefaultOperator = false;
                             continue;
                         }
                         case OPTIONAL_SUFFIX: {
@@ -217,7 +215,7 @@ public class DefaultFormatCompiler
                             stringBuffer2.setLength(0);
                             final Set<String> optionalValues = new HashSet<>();
                             if (Strings.nonEmpty(optionalString)) {
-                                final String[] strings = optionalString.split(Pattern.quote("|"));
+                                final String[] strings = optionalString.split(Pattern.quote("|"), 0);
                                 for (String string : strings) {
                                     check(!optionalValues.contains(string), originalText, charIndex, "选项值重定义：" + string);
                                     optionalValues.add(string);
@@ -227,7 +225,7 @@ public class DefaultFormatCompiler
                             final String names = stringBuffer1.toString();
                             stringBuffer1.setLength(0);
                             final Set<String> aliases = new HashSet<>();
-                            final String[] strings = names.split(Pattern.quote("|"));
+                            final String[] strings = names.split(Pattern.quote("|"), 0);
                             for (String string : strings) {
                                 check(Strings.nonEmpty(string), originalText, charIndex, "选项名不能为空！");
                                 aliases.add(string);
@@ -300,7 +298,7 @@ public class DefaultFormatCompiler
                             final String names = stringBuffer1.toString();
                             stringBuffer1.setLength(0);
                             final Set<String> aliases = new HashSet<>();
-                            final String[] strings = names.split(Pattern.quote("|"));
+                            final String[] strings = names.split(Pattern.quote("|"), 0);
                             for (String string : strings) {
                                 check(Strings.nonEmpty(string), originalText, charIndex, "选项名不能为空！");
                                 check(!environment.containsKey(string), originalText, charIndex, "选项重定义：" + string);
@@ -313,7 +311,7 @@ public class DefaultFormatCompiler
                                 final String optionalString = stringBuffer2.toString();
                                 stringBuffer2.setLength(0);
                                 optionalValues = new HashSet<>();
-                                for (String string : optionalString.split(Pattern.quote("|"))) {
+                                for (String string : optionalString.split(Pattern.quote("|"), 0)) {
                                     check(Strings.nonEmpty(string), originalText, charIndex, "选项名不能为空！");
                                     check(!optionalValues.contains(string), originalText, charIndex, "选项重定义：" + string);
                                     optionalValues.add(string);
@@ -325,7 +323,9 @@ public class DefaultFormatCompiler
                             // 默认值可以为空
                             final String defaultValue = stringBuffer3.toString();
                             stringBuffer3.setLength(0);
-                            optionalValues.add(defaultValue);
+                            if (Strings.nonEmpty(defaultValue)) {
+                                optionalValues.add(defaultValue);
+                            }
 
                             final String name = strings[0];
                             final OptionReferenceFormatElement option = new OptionReferenceFormatElement(name, aliases, defaultValue, optionalValues);

@@ -14,7 +14,7 @@ public class CommandRegisterEvent
     protected boolean cancelled;
 
     public CommandRegisterEvent(Command command) {
-        Preconditions.namedArgumentNonNull(command, "command");
+        Preconditions.objectNonNull(command, "command");
 
         this.command = command;
     }

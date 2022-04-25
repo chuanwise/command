@@ -21,13 +21,13 @@ public class SimpleExceptionHandler<T extends Throwable>
     public SimpleExceptionHandler(Class<T> exceptionClass, ExceptionConsumer<T> action) {
         super(exceptionClass);
     
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         this.action = action;
     }
     
     public SimpleExceptionHandler(ExceptionConsumer<T> action) {
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         this.action = action;
     }

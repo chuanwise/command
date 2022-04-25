@@ -18,7 +18,7 @@ public class RuntimeParseWirer<T>
     public RuntimeParseWirer(Class<T> filledClass, ParameterInfo parameterInfo) {
         super(filledClass);
 
-        Preconditions.namedArgumentNonNull(parameterInfo, "parameter info");
+        Preconditions.objectNonNull(parameterInfo, "parameter info");
 
         this.parameterInfo = parameterInfo;
     }

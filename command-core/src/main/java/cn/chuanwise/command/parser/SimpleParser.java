@@ -20,7 +20,7 @@ public class SimpleParser<T>
     private ExceptionFunction<ParseContext, Container<T>> action;
     
     public SimpleParser(ExceptionFunction<ParseContext, Container<T>> action) {
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         this.action = action;
     }
@@ -28,7 +28,7 @@ public class SimpleParser<T>
     public SimpleParser(Class<T> parsedClass, ExceptionFunction<ParseContext, Container<T>> action) {
         super(parsedClass);
     
-        Preconditions.namedArgumentNonNull(action, "action");
+        Preconditions.objectNonNull(action, "action");
         
         this.action = action;
     }

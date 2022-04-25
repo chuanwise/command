@@ -49,8 +49,8 @@ public class MethodCommandExecutor
     protected final Wirer[] wires;
 
     public MethodCommandExecutor(cn.chuanwise.command.command.Command command, Object source, Method method) {
-        Preconditions.namedArgumentNonNull(command, "command");
-        Preconditions.namedArgumentNonNull(method, "method");
+        Preconditions.objectNonNull(command, "command");
+        Preconditions.objectNonNull(method, "method");
         Preconditions.argument(method.isAnnotationPresent(Command.class), "method without @Command(...) annotation");
 
         this.command = command;
@@ -80,7 +80,14 @@ public class MethodCommandExecutor
                 wirer = new RuntimeWirer<>(parameterClass);
             } else {
                 // 根据注解解析
-                final String referenceName = reference.value();
+                final String tempReferenceName = reference.value();
+                final String referenceName;
+                if (Strings.isEmpty(tempReferenceName)) {
+                    referenceName = parameter.getName();
+                } else {
+                    referenceName = tempReferenceName;
+                }
+    
                 final ParameterInfo parameterInfo;
 
                 // 先当作普通参数，不行再查找

@@ -15,7 +15,7 @@ public abstract class AbstractCommanderObject
     protected final Commander commander;
 
     public AbstractCommanderObject(Commander commander) {
-        Preconditions.namedArgumentNonNull(commander, "commander");
+        Preconditions.objectNonNull(commander, "commander");
 
         this.commander = commander;
     }

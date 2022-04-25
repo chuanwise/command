@@ -1,9 +1,11 @@
 package cn.chuanwise.command.event;
 
+import cn.chuanwise.common.util.Exceptions;
 import cn.chuanwise.common.util.Preconditions;
 import cn.chuanwise.common.util.Reflections;
 import lombok.Data;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -25,8 +27,8 @@ public class MethodEventHandler<T>
     protected MethodEventHandler(Class<T> eventClass, Object source, Method method) {
         super(eventClass);
         
-        Preconditions.namedArgumentNonNull(source, "source");
-        Preconditions.namedArgumentNonNull(method, "method");
+        Preconditions.objectNonNull(source, "source");
+        Preconditions.objectNonNull(method, "method");
         
         this.source = source;
         this.method = method;
@@ -40,10 +42,10 @@ public class MethodEventHandler<T>
      * @return 事件监听器
      */
     public static MethodEventHandler<?> of(Object source, Method method) {
-        Preconditions.namedArgumentNonNull(method, "method");
+        Preconditions.objectNonNull(method, "method");
     
         final cn.chuanwise.command.annotation.EventHandler eventHandler = method.getAnnotation(cn.chuanwise.command.annotation.EventHandler.class);
-        Preconditions.namedArgumentNonNull(eventHandler, "方法不具备 @EventHandler 注解");
+        Preconditions.objectNonNull(eventHandler, "方法不具备 @EventHandler 注解");
     
         final Class<?> declaringClass = method.getDeclaringClass();
         if (Modifier.isStatic(method.getModifiers())) {
@@ -63,7 +65,11 @@ public class MethodEventHandler<T>
     
     @Override
     protected boolean handleEvent0(Object event) throws Exception {
-        Reflections.invokeMethod(source, method, event);
+        try {
+            Reflections.invokeMethod(source, method, event);
+        } catch (InvocationTargetException e) {
+            Exceptions.rethrow(e.getCause());
+        }
         return true;
     }
 }

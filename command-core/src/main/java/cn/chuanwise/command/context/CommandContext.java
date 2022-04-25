@@ -25,7 +25,7 @@ public class CommandContext
     public CommandContext(Object commandSender, Map<String, ReferenceInfo> referenceInfo, Command command) {
         super(command.getCommander());
 
-        Preconditions.namedArgumentNonNull(referenceInfo, "reference info");
+        Preconditions.objectNonNull(referenceInfo, "reference info");
 
         // command sender is nullable
         this.commandSender = commandSender;
